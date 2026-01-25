@@ -1,0 +1,6 @@
+[gd_scene load_steps=2 format=3 uid="uid://424rn56kvgjg"]
+
+[ext_resource type="Script" uid="uid://dgkwcve2fgq7i" path="res://addons/Lyra_Framework/lyra_emitter.gd" id="1_sovfj"]
+
+[node name="LyraEmitter" type="Node3D"]
+script = ExtResource("1_sovfj")
