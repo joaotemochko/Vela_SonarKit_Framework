@@ -1,4 +1,3 @@
-# res://addons/lyrasound/lyra_core.gd
 extends Node
 class_name LyraCore
 
@@ -6,21 +5,21 @@ enum InteractionType { GOAL, OBSTACLE, BOUNDARY, HAZARD }
 
 static var instance: Node = null
 
+var _session_id = str(Time.get_unix_time_from_system()).replace(".", "_")
 var _log_data = []
-var _session_id = str(Time.get_unix_time_from_system())
 var _available_players = []
 
 func _init():
+	# Instantiate the class
 	if instance == null:
 		instance = self
 	else:
-		# Se alguém tentar criar um segundo Core, ele se deleta para não dar conflito
 		queue_free()
 
 func _ready():
-	_log_data.append("timestamp;event;id;dist;x;y;z")
+	pass
 
-# --- SISTEMA DE AUDIO POOLING ---
+# ---  AUDIO POOLING SYSTEM ---
 
 func request_player(emitter: Node3D) -> AudioStreamPlayer3D:
 	var p: AudioStreamPlayer3D
@@ -32,14 +31,14 @@ func request_player(emitter: Node3D) -> AudioStreamPlayer3D:
 	else:
 		p = _available_players.pop_back()
 	
-	# CONFIGURAÇÃO SEGURA:
-	# Verifica se o emissor tem a propriedade 'audio_sample' e 'bus'
+	# SAFE CONFIGURATION:
+	# Check if the transmitter has the 'audio_sample' and 'bus' properties.
 	p.stream = emitter.audio_sample
 	
 	if "bus" in emitter:
 		p.bus = emitter.bus
 	else:
-		p.bus = "Lyra" # Fallback caso a variável não exista
+		p.bus = "Lyra"
 	
 	p.volume_db = emitter.audio_db
 	p.max_distance = 20.0
@@ -51,7 +50,7 @@ func release_player(p: AudioStreamPlayer3D):
 		p.stop()
 		_available_players.append(p)
 
-# --- FUNÇÕES DE APOIO (MATEMÁTICA E LOG) ---
+# --- SUPPORT FUNCTIONS (MATHEMATICS AND LOGIC) ---
 
 func get_presence_weight(distance: float, max_range: float) -> float:
 	return clamp(1.0 - (distance / max_range), 0.0, 1.0)
@@ -61,19 +60,36 @@ func get_dynamic_pitch(weight: float, type_index: int) -> float:
 		return lerp(1.0, 2.0, weight)
 	return lerp(1.0, 0.5, weight)
 
-func log_event(event_type: String, emitter_id: String, distance: float, pos: Vector3):
+func log_event(event_type: String, emitter_id: String, type_idx: int, distance: float, pos: Vector3):
 	var time = Time.get_ticks_msec() / 1000.0
-	var line = "%f;%s;%s;%f;%f;%f;%f" % [time, event_type, emitter_id, distance, pos.x, pos.y, pos.z]
+	
+	var line = "%s;%s;%s;%d;%s;%s;%s;%s" % [
+		str(time).replace(",", "."),
+		event_type,
+		emitter_id,
+		type_idx,
+		str(distance).replace(",", "."),
+		str(pos.x).replace(",", "."),
+		str(pos.y).replace(",", "."),
+		str(pos.z).replace(",", ".")
+	]
 	_log_data.append(line)
-
-func _notification(what):
-	if what == NOTIFICATION_WM_CLOSE_REQUEST:
+	
+	# Saves every 5 events to avoid data loss if the game crashes.
+	if _log_data.size() % 5 == 0:
 		_save_all_research_data()
 
 func _save_all_research_data():
-	var file = FileAccess.open("user://lyra_log_" + _session_id + ".csv", FileAccess.WRITE)
+	var path = "user://lyra_log_" + _session_id + ".csv"
+	
+	var file = FileAccess.open(path, FileAccess.WRITE)
 	if file:
-		for line in _log_data:
-			file.store_line(line)
+		file.store_line("timestamp;event;id;type;dist;x;y;z") # Header
+		for entry in _log_data:
+			file.store_line(entry)
 		file.close()
-		print("LYRA: Dados da pesquisa salvos com sucesso.")
+
+# Notify if save the log
+func _notification(what):
+	if what == NOTIFICATION_WM_CLOSE_REQUEST:
+		_save_all_research_data()

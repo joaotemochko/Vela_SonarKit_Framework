@@ -1,4 +1,3 @@
-# res://addons/lyrasound/lyra_emitter.gd
 extends Node3D
 class_name LyraEmitter
 
@@ -14,12 +13,10 @@ var lyra_Core
 
 var _is_inside: bool = false
 var _collision_shapes: Array = []
-var _active_player: AudioStreamPlayer3D = null # Inicia nulo, pois vem do Pool
+var _active_player: AudioStreamPlayer3D = null
 
 func _ready():
-	_find_all_collision_shapes()
-	
-	# Busca o Core na árvore ou cria um se for o primeiro emissor a rodar
+	# Search for the Core in the tree or create one if it's the first emitter to run.
 	if LyraCore.instance == null:
 		var new_core = load("res://addons/Lyra_Framework/lyra_core.gd").new()
 		get_tree().root.add_child.call_deferred(new_core)
@@ -33,7 +30,7 @@ func _find_all_collision_shapes():
 	_collision_shapes.clear()
 	var parent = get_parent()
 	for child in parent.get_children():
-		# Verificamos radar == 2 para Mesh3D (ajustado o índice do enum)
+		# We checked radar == number for type
 		if child is CollisionShape3D and radar == 0:
 			_collision_shapes.append(child)
 		elif child is Area3D and radar == 1:
@@ -42,11 +39,10 @@ func _find_all_collision_shapes():
 			_collision_shapes.append(child)
 
 func _process(_delta):
-	# Segurança: Se o Singleton LyraCore não existir na árvore, não processa
+	# Safety: If the LyraCore Singleton does not exist in the tree, it will not process.
 	if not is_instance_valid(lyra_Core): return 
 	
-	# --- CONTEÇÃO DE ERRO (SOLUÇÃO PARA QUEUE_FREE) ---
-	# Filtra a lista para remover referências a objetos que foram deletados
+	# Filter the list to remove references to objects that have been deleted.
 	_collision_shapes = _collision_shapes.filter(func(node): return is_instance_valid(node) and node.is_inside_tree())
 	
 	if _collision_shapes.is_empty():
@@ -62,10 +58,10 @@ func _process(_delta):
 	
 	if dist < max_range:
 		if not _is_inside:
-			# Solicita o player ao Singleton Global
+			# The player is being asked to contact Singleton Global.
 			_active_player = lyra_Core.request_player(self)
 			_is_inside = true
-			lyra_Core.log_event("ENTER", get_parent().name, dist, cam.global_position)
+			lyra_Core.log_event("ENTER", get_parent().name, interaction_type, dist, cam.global_position)
 		
 		if is_instance_valid(_active_player) and _active_player.is_inside_tree():
 			_active_player.global_position = nearest_data.position
@@ -96,7 +92,7 @@ func _update_audio_parameters(dist: float):
 
 func _exit_emitter(dist, cam_pos):
 	_is_inside = false
-	lyra_Core.log_event("EXIT", get_parent().name, dist, cam_pos) 
+	lyra_Core.log_event("EXIT", get_parent().name, interaction_type, dist, cam_pos) 
 	if is_instance_valid(_active_player):
 		lyra_Core.release_player(_active_player)
 	_active_player = null

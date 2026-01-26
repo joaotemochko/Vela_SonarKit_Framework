@@ -1,4 +1,3 @@
-# res://addons/lyrasound/lyrasound_plugin.gd
 @tool
 extends EditorPlugin
 
