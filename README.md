@@ -65,7 +65,7 @@ The framework includes the **Lyra Analyser**, a robust Python-based utility desi
 
 **Authors:**
 * João Antônio Temochko Andre - Instituto Federal de Educação, Ciência e Tecnologia de São Paulo (IFSP)
-* Johnata Souza Santicioli -Instituto Federal de Educação, Ciência e Tecnologia de São Paulo (IFSP)
+* Johnata Souza Santicioli - Instituto Federal de Educação, Ciência e Tecnologia de São Paulo (IFSP)
 * Carolina André da Silva - Universidade do Vale do Itajaí (UNIVALI)
 
 **Institutions:**
