@@ -1,7 +1,7 @@
-# Lyra Godot Framework 🌌
+# Vela SonarKit Godot Framework 🌌
 **A Spatial Sonification and Telemetry Framework for 3D Accessibility.**
 
-The Lyra Godot Framework is a specialized tool developed for the **Instituto Federal de Educação, Ciência e Tecnologia de São Paulo (IFSP)** and **Universidade do Vale do Itajaí (UNIVALI)**. It is designed to facilitate autonomous navigation for visually impaired users in virtual 3D environments by converting spatial topology into real-time auditory feedback.
+The Vela SonarKit Godot Framework is a specialized tool developed for the **Instituto Federal de Educação, Ciência e Tecnologia de São Paulo (IFSP)** and **Universidade do Vale do Itajaí (UNIVALI)**. It is designed to facilitate autonomous navigation for visually impaired users in virtual 3D environments by converting spatial topology into real-time auditory feedback.
 
 ## 🔬 Research Purpose
 
@@ -22,10 +22,10 @@ The tool serves two main scientific goals:
 
 ## 🛠️ Installation & Setup
 
-1.  Copy the `addons/Lyra_Framework` folder into your project's `res://addons/` directory.
+1.  Copy the `addons/Vela SonarKit_Framework` folder into your project's `res://addons/` directory.
 2.  Enable the plugin in **Project Settings > Plugins**.
-3.  The framework will automatically register the `LyraCore` singleton (if configured) or you can instance it manually within your emitters.
-4.  Configure the `Radar` export variable on the `LyraEmitter` node to select which type of geometry to monitor.
+3.  The framework will automatically register the `Vela SonarKitCore` singleton (if configured) or you can instance it manually within your emitters.
+4.  Configure the `Radar` export variable on the `Vela SonarKitEmitter` node to select which type of geometry to monitor.
 
 ---
 
