@@ -1,7 +1,7 @@
 extends Node3D
-class_name LyraEmitter
+class_name VelaEmitter
 
-var lyra_core: LyraCore
+var Vela_core: VelaCore
 
 enum SearchMode { PARENT_COLLIDERS, PARENT_MESHES, PARENT_AREAS }
 
@@ -17,7 +17,7 @@ enum SearchMode { PARENT_COLLIDERS, PARENT_MESHES, PARENT_AREAS }
 
 @export_group("Logic")
 ## Tipo de categoria sonora
-@export var category_type: LyraCore.CategoryType = LyraCore.CategoryType.BOUNDARY
+@export var category_type: VelaCore.CategoryType = VelaCore.CategoryType.BOUNDARY
 
 @export_group("Audio")
 ## Som a ser emitido
@@ -70,14 +70,14 @@ func _ready():
 func _setup_local_audio():
 	if audio_sample == null:
 		# Tentar som padrão
-		var paths = ["res://addons/Lyra_Framework/tone.ogg", "res://addons/Lyra/tone.ogg"]
+		var paths = ["res://addons/Vela_Framework/tone.ogg", "res://addons/Vela/tone.ogg"]
 		for path in paths:
 			if ResourceLoader.exists(path):
 				audio_sample = load(path)
 				break
 	
 	if audio_sample == null:
-		push_warning("[LYRA] Emitter sem som: " + name)
+		push_warning("[Vela] Emitter sem som: " + name)
 		return
 	
 	_local_player = AudioStreamPlayer3D.new()
@@ -95,44 +95,44 @@ func _init_geometry_delayed():
 	_find_geometry_nodes()
 	
 	# Iniciar tracking se for GOAL
-	if category_type == LyraCore.CategoryType.GOAL:
+	if category_type == VelaCore.CategoryType.GOAL:
 		call_deferred("_start_tracking")
 
 func _connect_to_core():
 	if not is_inside_tree():
 		await ready
 	
-	if LyraCore.instance:
-		lyra_core = LyraCore.instance
+	if VelaCore.instance:
+		Vela_core = VelaCore.instance
 	else:
 		var tree = get_tree()
 		if tree == null:
-			push_error("[LYRA] Emitter: get_tree() null")
+			push_error("[Vela] Emitter: get_tree() null")
 			return
 		
-		var found = tree.root.find_child("LyraCore", true, false)
+		var found = tree.root.find_child("VelaCore", true, false)
 		if found:
-			lyra_core = found
-			LyraCore.instance = found
+			Vela_core = found
+			VelaCore.instance = found
 		else:
-			var new_core = LyraCore.new()
-			new_core.name = "LyraCore"
+			var new_core = VelaCore.new()
+			new_core.name = "VelaCore"
 			tree.root.call_deferred("add_child", new_core)
-			lyra_core = new_core
-			LyraCore.instance = new_core
+			Vela_core = new_core
+			VelaCore.instance = new_core
 			await tree.process_frame
 	
-	if lyra_core:
-		lyra_core.register_emitter(self)
+	if Vela_core:
+		Vela_core.register_emitter(self)
 
 func _start_tracking():
 	"""Inicia tracking de distância para GOAL"""
-	if not is_instance_valid(lyra_core):
+	if not is_instance_valid(Vela_core):
 		return
-	if not lyra_core.is_inside_tree():
+	if not Vela_core.is_inside_tree():
 		return
 	
-	var p_pos = lyra_core._get_player_pos()
+	var p_pos = Vela_core._get_player_pos()
 	if p_pos == Vector3.ZERO:
 		return
 	
@@ -156,15 +156,15 @@ func _process(delta):
 			_find_geometry_nodes()
 		return
 	
-	if not is_instance_valid(lyra_core):
+	if not is_instance_valid(Vela_core):
 		return
 	
-	var p_pos = lyra_core._get_player_pos()
+	var p_pos = Vela_core._get_player_pos()
 	if p_pos == Vector3.ZERO:
 		return
 	
 	# Atualizar tracking para GOAL
-	if _tracking_player and category_type == LyraCore.CategoryType.GOAL:
+	if _tracking_player and category_type == VelaCore.CategoryType.GOAL:
 		var moved = p_pos.distance_to(_tracking_last_pos)
 		_tracking_distance += moved
 		_tracking_last_pos = p_pos
@@ -197,7 +197,7 @@ func get_smart_distance(target_pos: Vector3) -> Dictionary:
 	- GOAL/INTERACTABLE: ponto a ponto
 	- BOUNDARY/OBSTACLE/HAZARD: distância à superfície
 	"""
-	if category_type == LyraCore.CategoryType.GOAL or category_type == LyraCore.CategoryType.INTERACTABLE:
+	if category_type == VelaCore.CategoryType.GOAL or category_type == VelaCore.CategoryType.INTERACTABLE:
 		return {"distance": global_position.distance_to(target_pos), "position": global_position}
 	
 	var min_dist = 99999.0
@@ -295,13 +295,13 @@ func _update_audio(active: bool, intensity: float, pos: Vector3):
 
 func collect():
 	"""Coleta este emitter (para GOALs)"""
-	print("[LYRA] Collecting: ", name)
+	print("[Vela] Collecting: ", name)
 	
-	if is_instance_valid(lyra_core) and lyra_core.science_mode:
+	if is_instance_valid(Vela_core) and Vela_core.science_mode:
 		var dist_traveled = _tracking_distance if _tracking_distance > 0 else 0.0
 		var optimal = _optimal_distance if _optimal_distance > 0 else 1.0
 		
-		lyra_core.log_event_collect(
+		Vela_core.log_event_collect(
 			name,
 			category_type,
 			global_position,
@@ -309,8 +309,8 @@ func collect():
 			optimal
 		)
 	
-	if is_instance_valid(lyra_core):
-		lyra_core.unregister_emitter(self)
+	if is_instance_valid(Vela_core):
+		Vela_core.unregister_emitter(self)
 	
 	# Destruir
 	if get_parent() and get_parent() != get_tree().current_scene:

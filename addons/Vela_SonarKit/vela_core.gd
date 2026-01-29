@@ -1,7 +1,7 @@
 extends Node
-class_name LyraCore
+class_name VelaCore
 
-static var instance: LyraCore
+static var instance: VelaCore
 
 enum CategoryType { BOUNDARY, OBSTACLE, GOAL, INTERACTABLE, HAZARD }
 
@@ -17,7 +17,7 @@ enum CategoryType { BOUNDARY, OBSTACLE, GOAL, INTERACTABLE, HAZARD }
 ## Radar SEMPRE ATIVO - essencial para navegação de pessoas cegas
 @export var radar_enabled: bool = true
 ## Som do radar (ping/bip)
-@export var scanner_ping_sound: AudioStream
+@export var scanner_ping_sound: AudioStream = load("res://addons/Vela_SonarKit/coin.ogg")
 ## Volume base do radar em dB
 @export_range(-20.0, 10.0, 0.5) var scanner_volume_db: float = 0.0
 ## Distância máxima de detecção do radar
@@ -76,8 +76,8 @@ func _ready():
 	# Tentar carregar som padrão se não definido
 	if scanner_ping_sound == null:
 		var possible_paths = [
-			"res://addons/Lyra_Framework/coin.ogg",
-			"res://addons/Lyra/coin.ogg",
+			"res://addons/Vela_Framework/coin.ogg",
+			"res://addons/Vela/coin.ogg",
 			"res://coin.ogg"
 		]
 		for path in possible_paths:
@@ -91,9 +91,9 @@ func _ready():
 	
 	if science_mode:
 		_setup_csv()
-		print("[LYRA] Science Mode: ON | Session: ", _session_id)
+		print("[Vela] Science Mode: ON | Session: ", _session_id)
 	else:
-		print("[LYRA] Science Mode: OFF")
+		print("[Vela] Science Mode: OFF")
 	
 	if debug_orientation: 
 		_create_debug_arrow()
@@ -101,7 +101,7 @@ func _ready():
 	_last_timestamp = Time.get_unix_time_from_system()
 	
 	# Radar sempre começa ativo
-	print("[LYRA] Radar: ALWAYS ON (accessibility mode)")
+	print("[Vela] Radar: ALWAYS ON (accessibility mode)")
 
 func _generate_session_id() -> String:
 	var time = Time.get_datetime_dict_from_system()
@@ -324,7 +324,7 @@ func _play_radar_ping(pos: Vector3, pitch: float, distance: float):
 func register_emitter(e):
 	if not _emitters.has(e):
 		_emitters.append(e)
-		print("[LYRA] Registered: ", e.name, " (", CategoryType.keys()[e.category_type], ")")
+		print("[Vela] Registered: ", e.name, " (", CategoryType.keys()[e.category_type], ")")
 
 func unregister_emitter(e):
 	if _emitters.has(e):
@@ -336,10 +336,10 @@ func unregister_emitter(e):
 
 func _setup_csv():
 	"""Cria arquivo CSV com cabeçalho científico completo"""
-	var fname = "user://LYRA_SESSION_" + _session_id + ".csv"
+	var fname = "user://Vela_SESSION_" + _session_id + ".csv"
 	var real_path = ProjectSettings.globalize_path(fname)
 	
-	print("[LYRA] CSV: ", real_path)
+	print("[Vela] CSV: ", real_path)
 	
 	_file = FileAccess.open(fname, FileAccess.WRITE)
 	if _file:
@@ -445,7 +445,7 @@ func _log_event(event: String, id: String, category: int, dist_local: float, pos
 	line += "1;%.2f;%d;%d;%d" % [_total_distance_traveled, _goals_collected, _total_collisions, _heading_changes]
 	
 	_file.store_line(line)
-	print("[LYRA] ", event, ": ", id)
+	print("[Vela] ", event, ": ", id)
 
 func log_event_collect(id: String, category: int, emitter_pos: Vector3, dist_traveled: float, optimal_dist: float):
 	"""Log evento COLLECT (chamado pelo emitter)"""
@@ -469,7 +469,7 @@ func log_event_collect(id: String, category: int, emitter_pos: Vector3, dist_tra
 	_file.store_line(line)
 	_file.flush()
 	
-	print("[LYRA] COLLECT: ", id, " | Goals: ", _goals_collected)
+	print("[Vela] COLLECT: ", id, " | Goals: ", _goals_collected)
 
 func _get_distances_by_category(pos: Vector3) -> Dictionary:
 	"""Calcula distância mínima a cada categoria"""
@@ -603,5 +603,5 @@ func _close_csv():
 		_file.flush()
 		_file.close()
 		_file = null
-		print("[LYRA] CSV saved")
-		print("[LYRA] Summary: ", get_session_summary())
+		print("[Vela] CSV saved")
+		print("[Vela] Summary: ", get_session_summary())
